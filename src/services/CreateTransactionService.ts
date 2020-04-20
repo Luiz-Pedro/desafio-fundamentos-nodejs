@@ -14,11 +14,9 @@ class CreateTransactionService {
   }
 
   public execute({ title, value, type }: Request): Transaction {
-    const isGreaterThanCurrentValue = this.transactionsRepository.isGreaterThanCurrentValue(
-      value,
-      type,
-    );
-    if (isGreaterThanCurrentValue) {
+    const balance = this.transactionsRepository.getBalance();
+
+    if (type === 'outcome' && value > balance.total) {
       throw Error('Outcome value cannot be grater than income value.');
     }
 

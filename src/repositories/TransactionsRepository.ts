@@ -19,37 +19,33 @@ class TransactionsRepository {
   }
 
   public all(): {} {
-    return {
-      transactions: this.transactions,
-      balance: this.getBalance(),
-    };
-  }
-
-  public isGreaterThanCurrentValue(value: number, type: string): boolean {
-    if (type === 'outcome') {
-      const balance = this.getBalance();
-
-      if (value > balance.total) {
-        return true;
-      }
-      return false;
-    }
-    return false;
+    return this.transactions;
   }
 
   public getBalance(): Balance {
-    let income = 0;
-    let outcome = 0;
+    const { income, outcome } = this.transactions.reduce(
+      (accumulator: Balance, transaction: Transaction) => {
+        switch (transaction.type) {
+          case 'income':
+            accumulator.income += transaction.value;
+            break;
+          case 'outcome':
+            accumulator.outcome += transaction.value;
+            break;
+          default:
+            break;
+        }
+        return accumulator;
+      },
+      {
+        income: 0,
+        outcome: 0,
+        total: 0,
+      },
+    );
 
-    // eslint-disable-next-line array-callback-return
-    this.transactions.map(transaction => {
-      if (transaction.type === 'income') {
-        income += transaction.value;
-      } else {
-        outcome += transaction.value;
-      }
-    });
     const total = income - outcome;
+
     return {
       income,
       outcome,
